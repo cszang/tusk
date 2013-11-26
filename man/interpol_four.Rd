@@ -1,0 +1,47 @@
+\name{interpol_four}
+\alias{interpol_four}
+\title{Interpolate from gridded climate data sets}
+\usage{
+  interpol_four(netcdf, param, coords, nearest,
+    data_set = "ts320")
+}
+\arguments{
+  \item{netcdf}{the ncdf object the data should be
+  extracted from}
+
+  \item{param}{the name of the paramater to extract as
+  character string}
+
+  \item{coords}{the coordinates of the point to get the
+  data for as list with $lon and $lat}
+
+  \item{nearest}{a nearest gridpoints objects as returned
+  from four_nearest()}
+
+  \item{data_set}{the kind of data set used (see
+  ?supported_sets)}
+}
+\value{
+  a data.frame holding the extracted and interpolated data
+}
+\description{
+  Interpolate gridded climate data for a given coordinate
+  pair
+}
+\details{
+  Interpolation is done using inverse distance weighting
+  over the four nearest grid points. The results will
+  depend on the kind of data used for interpolation. E.g.,
+  using CRU TS 3.20 will result in monthly data starting in
+  January 1901.
+}
+\examples{
+\dontrun{
+library(ncdf)
+cru_maxtemp <- open.ncdf("~/Data/cru_ts3.20.1901.2011.tmx.dat.nc")
+my_coords <- list(lon = 0.3, lat = 40.81)
+my_nearest <- four_nearest(my_coords, cru_maxtemp, "ts320")
+interpol_four(cru_maxtemp, "tmx", my_coords, my_nearest, "ts320")
+}
+}
+

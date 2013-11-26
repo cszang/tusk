@@ -1,0 +1,14 @@
+Package: tusk
+Type: Package
+Title: Conveniently access gridded climate data sets
+Version: 0.1
+Date: 2013-11-25
+Author: Christian Zang
+Maintainer: Christian Zang <christian.zang@wzw.tum.de>
+Depends:
+    ncdf
+Description: This small package aims at extracting point-specific climate data
+    from some common gridded climate data sets
+License: MIT
+Collate:
+    'tusk.R'

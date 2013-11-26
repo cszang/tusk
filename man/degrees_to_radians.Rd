@@ -1,0 +1,23 @@
+\name{degrees_to_radians}
+\alias{degrees_to_radians}
+\title{Convert degrees to radians}
+\usage{
+  degrees_to_radians(x)
+}
+\arguments{
+  \item{x}{the coordinate in decimal degrees}
+}
+\value{
+  the coordinate as radians
+}
+\description{
+  Convert a coordinate from decimal degrees to radians
+}
+\details{
+  This function converts coordinates from decimal degrees
+  to radians.
+}
+\examples{
+degrees_to_radians(40.81)
+}
+
