@@ -5,14 +5,15 @@
 ##' Reported supported data sets
 ##'
 ##' ts320: CRU TS 3.20
+##' spei22: SPEIbase v.2.2
 ##' @title Supported data sets
 ##' @return a vector holding the short names of supported data sets
 ##' @examples
 ##' supported_sets()
 ##' @export
 supported_sets <- function() {
-  supp <- list(abbrev = c("ts320"),
-       full = c("CRU TS 3.20"))
+  supp <- list(abbrev = c("ts320", "spei22"),
+       full = c("CRU TS 3.20", "SPEIbase v.2.2"))
   class(supp) <- c("list", "tusk_supported_sets")
   supp
 }
@@ -87,7 +88,7 @@ four_nearest <- function(coords, netcdf, data_set = "ts320") {
     stop("Data set not supported. See ?supported_sets.")
   }
   require(ncdf)
-  if (data_set == "ts320") {
+  if (any(data_set == c("ts320", "spei22"))) {
     all_lon <- get.var.ncdf(netcdf, "lon")
     all_lat <- get.var.ncdf(netcdf, "lat")
   }
@@ -141,9 +142,11 @@ interpol_four <- function(netcdf, param, coords, nearest, data_set = "ts320") {
     this_lon <- nearest[[i]]$lon
     this_lat <- nearest[[i]]$lat
     .start <- switch(data_set,
-                     ts320 = c(this_lon, this_lat, 1))
+                     ts320 = c(this_lon, this_lat, 1),
+                     spei22 = c(this_lon, this_lat, 1))
     .count <- switch(data_set,
-                     ts320 = c(1, 1, -1))
+                     ts320 = c(1, 1, -1),
+                     spei22 = c(1, 1, -1))
     extract <- cbind(extract,
                      get.var.ncdf(netcdf, param,
                                   start = .start,
@@ -156,9 +159,11 @@ interpol_four <- function(netcdf, param, coords, nearest, data_set = "ts320") {
   extract_weight <- sweep(extract, 2, weights, `*`)
   extract_int <- apply(extract_weight, 1, function(x) sum(x/sum(weights)))
   
-  if (data_set == "ts320") {
+  if (any(data_set == c("ts320", "spei22"))) {
     first_date <- as.Date("1901-01-01")
-    whole_period <- seq(first_date, length.out = 1332, by = "1 month")
+    time_length <- length(get.var.ncdf(netcdf, "time"))
+    whole_period <- seq(first_date, length.out = time_length,
+                        by = "1 month")
     Years <- as.numeric(substr(whole_period, 1, 4))
     Months <- as.numeric(substr(whole_period, 6, 7))
     out <- data.frame(
