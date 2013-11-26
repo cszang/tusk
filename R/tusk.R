@@ -99,12 +99,33 @@ four_nearest <- function(coords, netcdf, data_set = "ts320") {
   lons <- c(tail(which(all_lon < lon), 1), which(all_lon > lon)[1])
   lats <- c(tail(which(all_lat < lat), 1), which(all_lat > lat)[1])
   # combine to four gridpoints
-  list(
+  index <- list(
     list(lon = lons[1], lat = lats[1]),
     list(lon = lons[1], lat = lats[2]),
     list(lon = lons[2], lat = lats[2]),
     list(lon = lons[2], lat = lats[1])
-  )
+    )
+   degrees <- list(
+    list(lon = all_lon[lons[1]], lat = all_lat[lats[1]]),
+    list(lon = all_lon[lons[1]], lat = all_lat[lats[2]]),
+    list(lon = all_lon[lons[2]], lat = all_lat[lats[2]]),
+    list(lon = all_lon[lons[2]], lat = all_lat[lats[1]])
+    )
+  class(index) <- c("tusk_four_nearest", "list")
+  attributes(index)$coords <- degrees
+  index
+}
+
+##' @export
+print.tusk_four_nearest <- function(x, ...) {
+  coords <- attributes(x)$coords
+  pretty_coords <- matrix(NA, ncol = 2, nrow = 4)
+    for (i in 1:4) {
+    pretty_coords[i,] <- c(coords[[i]]$lon, coords[[i]]$lat)
+  }
+  pretty_coords <- data.frame(pretty_coords)
+  names(pretty_coords) <- c("Longitude", "Latitude")
+  print(pretty_coords, ...)
 }
 
 ##' Interpolate gridded climate data for a given coordinate pair
