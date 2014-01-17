@@ -9,6 +9,6 @@ Depends:
     ncdf
 Description: This small package aims at extracting point-specific climate data
     from some common gridded climate data sets
-License: MIT
+License: GPL-3
 Collate:
     'tusk.R'
