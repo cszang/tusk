@@ -1,0 +1,29 @@
+* tusk
+  Make working with gridded climate data in R a little easier. 
+
+** Purpose
+   Extract point-specific climate data from some commonly used gridded
+   climate data sets.
+
+** Data sets
+   The data sets have to be downloaded by the user and saved locally
+   as netCDF files. Currently, these data sets are supported:
+   - [[http://badc.nerc.ac.uk/view/badc.nerc.ac.uk__ATOM__ACTIVITY_3ec0d1c6-4616-11e2-89a3-00163e251233][CRU TS 3.20]]
+   - [[http://digital.csic.es/handle/10261/72264][SPEIbase v.2.2]]
+   - [[http://www.cgd.ucar.edu/cas/catalog/climind/pdsi.html][scPDSI from Dai 2011a and 2011b]]
+
+** Installation
+
+#+begin_src R
+install.packages("devtools")
+library(devtools)
+install_github("tusk", "znag")
+#+end_src
+
+** Usage
+   See =?interpol_four= for details.
+
+** Todo
+
+   - support netCDF version 4
+   - additional data sets?
