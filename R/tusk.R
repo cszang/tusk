@@ -1,7 +1,3 @@
-## tusk is small library to help with commonly used gridded data sets.
-## ATM, the following data sets are supported:
-## - CRU TS 3.20
-
 ##' Reported supported data sets
 ##'
 ##' ts320: CRU TS 3.20
