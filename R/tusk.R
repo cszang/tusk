@@ -1,6 +1,6 @@
 ##' Reported supported data sets
 ##'
-##' ts320: CRU TS 3.20
+##' ts321: CRU TS 3.21
 ##' spei22: SPEIbase v.2.2
 ##' pdsidai2011: scPDSI from Dai 2011a and 2011b
 ##' @title Supported data sets
@@ -9,8 +9,8 @@
 ##' supported_sets()
 ##' @export
 supported_sets <- function() {
-  supp <- list(abbrev = c("ts320", "spei22", "pdsidai2011"),
-       full = c("CRU TS 3.20", "SPEIbase v.2.2",
+  supp <- list(abbrev = c("ts321", "spei22", "pdsidai2011"),
+       full = c("CRU TS 3.21", "SPEIbase v.2.2",
          "scPDSI from Dai 2011a and 2011b"))
   class(supp) <- c("list", "tusk_supported_sets")
   supp
@@ -79,16 +79,15 @@ great_circle_dist <- function(x1, x2) {
 ##' @param netcdf the ncdf object holding the relevant data
 ##' @param data_set the kind of data used (see ?supported_sets) for details
 ##' @return a list holding four lists, with each holding a lat/lot
-##' @import ncdf
+##' @import ncdf4
 ##' @export
-four_nearest <- function(coords, netcdf, data_set = "ts320") {
+four_nearest <- function(coords, netcdf, data_set = "ts321") {
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
   }
-  require(ncdf)
-  if (any(data_set == c("ts320", "spei22", "pdsidai2011"))) {
-    all_lon <- get.var.ncdf(netcdf, "lon")
-    all_lat <- get.var.ncdf(netcdf, "lat")
+  if (any(data_set == c("ts321", "spei22", "pdsidai2011"))) {
+    all_lon <- ncvar_get(netcdf, "lon")
+    all_lat <- ncvar_get(netcdf, "lat")
   }
   lon <- coords$lon
   lat <- coords$lat
@@ -142,36 +141,35 @@ print.tusk_four_nearest <- function(x, ...) {
 ##' @return a data.frame holding the extracted and interpolated data
 ##' @examples
 ##' \dontrun{
-##' library(ncdf)
-##' cru_maxtemp <- open.ncdf("~/Data/cru_ts3.20.1901.2011.tmx.dat.nc")
+##' library(ncdf4)
+##' cru_maxtemp <- nc_open("~/Data/cru_ts3.21.1901.2012.tmp.dat.nc")
 ##' my_coords <- list(lon = 0.3, lat = 40.81)
-##' my_nearest <- four_nearest(my_coords, cru_maxtemp, "ts320")
-##' interpol_four(cru_maxtemp, "tmx", my_coords, my_nearest, "ts320")
+##' my_nearest <- four_nearest(my_coords, cru_maxtemp, "ts321")
+##' interpol_four(cru_maxtemp, "tmx", my_coords, my_nearest, "ts321")
 ##' }
-##' @import ncdf
+##' @import ncdf4
 ##' @export
-interpol_four <- function(netcdf, param, coords, nearest, data_set = "ts320") {
+interpol_four <- function(netcdf, param, coords, nearest, data_set = "ts321") {
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
   }
-  require(ncdf)
   dists <- numeric(4)
   extract <- NULL
   for (i in 1:4) {
     this_lon <- nearest[[i]]$lon
     this_lat <- nearest[[i]]$lat
     .start <- switch(data_set,
-                     ts320 = c(this_lon, this_lat, 1),
+                     ts321 = c(this_lon, this_lat, 1),
                      spei22 = c(this_lon, this_lat, 1),
                      pdsidai2011 = c(this_lon, this_lat, 1))
     .count <- switch(data_set,
-                     ts320 = c(1, 1, -1),
+                     ts321 = c(1, 1, -1),
                      spei22 = c(1, 1, -1),
                      pdsidai2011 = c(1, 1, -1))
     extract <- cbind(extract,
-                     get.var.ncdf(netcdf, param,
-                                  start = .start,
-                                  count = .count))
+                     ncvar_get(netcdf, param,
+                               start = .start,
+                               count = .count))
     dists[i] <- great_circle_dist(nearest[[i]],
                                   list(lon = coords$lon,
                                        lat = coords$lat))
@@ -180,12 +178,12 @@ interpol_four <- function(netcdf, param, coords, nearest, data_set = "ts320") {
   extract_weight <- sweep(extract, 2, weights, `*`)
   extract_int <- apply(extract_weight, 1, function(x) sum(x/sum(weights)))
   
-  if (any(data_set == c("ts320", "spei22", "pdsidai2011"))) {
+  if (any(data_set == c("ts321", "spei22", "pdsidai2011"))) {
     first_date <- switch(data_set,
-                         ts320 = as.Date("1901-01-01"),
+                         ts321 = as.Date("1901-01-01"),
                          spei22 = as.Date("1901-01-01"),
                          pdsidai2011 = as.Date("1850-01-01"))
-    time_length <- length(get.var.ncdf(netcdf, "time"))
+    time_length <- length(ncvar_get(netcdf, "time"))
     whole_period <- seq(first_date, length.out = time_length,
                         by = "1 month")
     Years <- as.numeric(substr(whole_period, 1, 4))
