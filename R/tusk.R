@@ -93,6 +93,14 @@ four_nearest <- function(coords, netcdf, data_set = "ts321") {
   lat <- coords$lat
   lons <- c(tail(which(all_lon < lon), 1), which(all_lon > lon)[1])
   lats <- c(tail(which(all_lat < lat), 1), which(all_lat > lat)[1])
+  replace_missing <- function(x) {
+    if (length(x) == 1) {
+      x <- c(x, x)
+    }
+    x
+  }
+  lons <- replace_missing(lons)
+  lats <- replace_missing(lats)
   # combine to four gridpoints
   index <- list(
     list(lon = lons[1], lat = lats[1]),
