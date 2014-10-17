@@ -81,7 +81,7 @@ great_circle_dist <- function(x1, x2) {
 ##' @return a list holding four lists, with each holding a lat/lot
 ##' @import ncdf4
 ##' @export
-four_nearest <- function(coords, netcdf, data_set = "ts321") {
+four_nearest <- function(coords, netcdf, data_set = "ts321", mode = 4) {
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
   }
@@ -101,29 +101,35 @@ four_nearest <- function(coords, netcdf, data_set = "ts321") {
   }
   lons <- replace_missing(lons)
   lats <- replace_missing(lats)
-  # combine to four gridpoints
-  index <- list(
-    list(lon = lons[1], lat = lats[1]),
-    list(lon = lons[1], lat = lats[2]),
-    list(lon = lons[2], lat = lats[2]),
-    list(lon = lons[2], lat = lats[1])
-    )
-   degrees <- list(
-    list(lon = all_lon[lons[1]], lat = all_lat[lats[1]]),
-    list(lon = all_lon[lons[1]], lat = all_lat[lats[2]]),
-    list(lon = all_lon[lons[2]], lat = all_lat[lats[2]]),
-    list(lon = all_lon[lons[2]], lat = all_lat[lats[1]])
-    )
+  lons16 <- c(min(lons) - 1, min(lons), max(lons), max(lons) + 1)
+  lats16 <- c(min(lats) - 1, min(lats), max(lats), max(lats) + 1)
+
+  if (mode == 4) {
+    gridm <- expand.grid(lon = lons, lat = lats)
+  } else {
+    gridm <- expand.grid(lon = lons16, lat = lats16)
+  }
+  
+  index <- degrees <- list()
+  o <- dim(gridm)[1]
+  
+  for (i in 1:o) {
+    index[[i]] <- list(lon = gridm$lon[i], lat = gridm$lat[i])
+    degrees[[i]] <- list(lon = all_lon[gridm$lon[i]],
+                         lat = all_lat[gridm$lat[i]])
+  }
+  
   class(index) <- c("tusk_four_nearest", "list")
-  attributes(index)$coords <- degrees
+  attributes(index)$coords <- degrees  
   index
 }
 
 ##' @export
 print.tusk_four_nearest <- function(x, ...) {
+  n <- length(x)
   coords <- attributes(x)$coords
-  pretty_coords <- matrix(NA, ncol = 2, nrow = 4)
-    for (i in 1:4) {
+  pretty_coords <- matrix(NA, ncol = 2, nrow = n)
+    for (i in 1:n) {
     pretty_coords[i,] <- c(coords[[i]]$lon, coords[[i]]$lat)
   }
   pretty_coords <- data.frame(pretty_coords)
@@ -178,7 +184,7 @@ interpol_four <- function(netcdf, param, coords, nearest, data_set = "ts321") {
                      ncvar_get(netcdf, param,
                                start = .start,
                                count = .count))
-    dists[i] <- great_circle_dist(nearest[[i]],
+    dists[i] <- great_circle_dist(attr(nearest, "coords")[[i]],
                                   list(lon = coords$lon,
                                        lat = coords$lat))
   }
