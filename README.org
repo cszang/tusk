@@ -2,12 +2,20 @@
   Make working with gridded climate data in R a little easier. 
 
 ** Purpose
+
    Extract point-specific climate data from some commonly used gridded
-   climate data sets.
+   climate data sets. For CRU temperature and precipitation,
+   downscaling to 30 arc seconds using Worldclim data can be
+   performed, following the methodology by Mosier et al. 2014 (Mosier,
+   T. M. et al. 2014. 30-Arcsecond monthly climate surfaces with
+   global land coverage. - Int. J. Climatol. 34: 2175–2188).
 
 ** Data sets
+
    The data sets have to be downloaded by the user and saved locally
-   as netCDF files. Currently, these data sets are supported:
+   as netCDF files, or as generic grids (bil-files) in the case of
+   Worldclim data, if downscaling shall be performed. Currently, these
+   data sets are supported:
    - [[http://badc.nerc.ac.uk/view/badc.nerc.ac.uk__ATOM__ACTIVITY_3ec0d1c6-4616-11e2-89a3-00163e251233][CRU TS 3.20]]
    - [[http://digital.csic.es/handle/10261/72264][SPEIbase v.2.2]]
    - [[http://www.cgd.ucar.edu/cas/catalog/climind/pdsi.html][scPDSI from Dai 2011a and 2011b]]
@@ -21,9 +29,9 @@ install_github("tusk", "znag")
 #+end_src
 
 ** Usage
-   See =?interpol_four= for details.
+   See =?interp_down= for details.
 
 ** Todo
-
-   - support netCDF version 4
+   
+   - update CRU to TS 3.22
    - additional data sets?
