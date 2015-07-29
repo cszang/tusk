@@ -1,13 +1,14 @@
 Package: tusk
 Type: Package
 Title: Conveniently access gridded climate data sets
-Version: 0.7
-Date: 2014-10-22
+Version: 0.8
+Date: 2015-07-29
 Author: Christian Zang
 Maintainer: Christian Zang <christian.zang@wzw.tum.de>
 Depends:
     ncdf4,
-    raster
+    raster,
+    rgdal
 Description: This small package aims at extracting point-specific climate data
     from some common gridded climate data sets, and allows to downscale to
     30 arc seconds using the Worldclim grid
