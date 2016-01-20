@@ -21,4 +21,3 @@ This function converts coordinates from decimal degrees to radians.
 \examples{
 degrees_to_radians(40.81)
 }
-
