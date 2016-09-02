@@ -16,7 +16,7 @@
    as netCDF files, or as generic grids (bil-files) in the case of
    Worldclim data, if downscaling shall be performed. Currently, these
    data sets are supported:
-   - [[http://badc.nerc.ac.uk/view/badc.nerc.ac.uk__ATOM__ACTIVITY_3ec0d1c6-4616-11e2-89a3-00163e251233][CRU TS 3.20]]
+   - [[http://badc.nerc.ac.uk/view/badc.nerc.ac.uk__ATOM__ACTIVITY_3ec0d1c6-4616-11e2-89a3-00163e251233][CRU TS 3.20]] to [[http://catalogue.ceda.ac.uk/uuid/4a6d071383976a5fb24b5b42e28cf28f][CRU TS 3.22]]
    - [[http://digital.csic.es/handle/10261/72264][SPEIbase v.2.2]]
    - [[http://www.cgd.ucar.edu/cas/catalog/climind/pdsi.html][scPDSI from Dai 2011a and 2011b]]
 
@@ -24,8 +24,7 @@
 
 #+begin_src R
 install.packages("devtools")
-library(devtools)
-install_github("tusk", "znag")
+devtools::install_github("cszang/tusk")
 #+end_src
 
 ** Usage
@@ -33,5 +32,4 @@ install_github("tusk", "znag")
 
 ** Todo
    
-   - update CRU to TS 3.22
    - additional data sets?
