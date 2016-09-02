@@ -1,4 +1,4 @@
-[[https://travis-ci.org/cszang/tusk.svg?branch=master][https://travis-ci.org/cszang/tusk]]
+[[file:https:/travis-ci.org/cszang/tusk.svg?branch=master][https://travis-ci.org/cszang/tusk]]
 
 * tusk
   Make working with gridded climate data in R a little easier. 
