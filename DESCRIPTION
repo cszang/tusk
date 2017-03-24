@@ -1,8 +1,8 @@
 Package: tusk
 Type: Package
 Title: Conveniently access gridded climate data sets
-Version: 0.90
-Date: 2016-12-22
+Version: 0.99
+Date: 2017-03-24
 Author: Christian Zang
 Maintainer: Christian Zang <christian.zang@wzw.tum.de>
 Depends:
@@ -13,4 +13,4 @@ Description: This small package aims at extracting point-specific climate data
     from some common gridded climate data sets, and allows to downscale to
     30 arc seconds using the Worldclim grid for CRU TS data.
 License: GPL-3
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

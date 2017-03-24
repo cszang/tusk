@@ -25,4 +25,3 @@ Get four or sixteen nearest gridpoints for a lon/lat pair.
 The returned list of gridpoint coordinates can be used for
 interpolation
 }
-

@@ -18,8 +18,8 @@ ts321: CRU TS 3.21
 spei22: SPEIbase v.2.2
 pdsidai2011: scPDSI from Dai 2011a and 2011b
 eobs140: E-OBS data daily data version 14.0
+puhg_pet: Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset
 }
 \examples{
 supported_sets()
 }
-

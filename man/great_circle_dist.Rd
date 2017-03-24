@@ -28,4 +28,3 @@ cos(lon1 - lon2)) * R
 great_circle_dist(list(lon = 0.3, lat = 40.91), list(lon = 1.3,
 lat = 41.02))
 }
-

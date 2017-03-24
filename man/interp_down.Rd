@@ -55,4 +55,3 @@ my_nearest <- nearest_points(my_coords, cru_maxtemp, "ts322")
 interp_down(cru_maxtemp, "tmx", my_coords, my_nearest, "ts322")
 }
 }
-

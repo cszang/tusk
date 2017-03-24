@@ -5,15 +5,18 @@
 ##' spei22: SPEIbase v.2.2
 ##' pdsidai2011: scPDSI from Dai 2011a and 2011b
 ##' eobs140: E-OBS data daily data version 14.0
+##' puhg_pet: Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset
 ##' @title Supported data sets
 ##' @return a vector holding the short names of supported data sets
 ##' @examples
 ##' supported_sets()
 ##' @export
 supported_sets <- function() {
-  supp <- list(abbrev = c("ts322", "ts321", "spei22", "pdsidai2011", "eobs140"),
+  supp <- list(abbrev = c("ts322", "ts321", "spei22", "pdsidai2011",
+                         "eobs140", "puhg_pet"),
        full = c("CRU TS 3.22", "CRU TS 3.21", "SPEIbase v.2.2",
-         "scPDSI from Dai 2011a and 2011b", "E-OBS 14.0"))
+                "scPDSI from Dai 2011a and 2011b", "E-OBS 14.0",
+                "Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset"))
   class(supp) <- c("list", "tusk_supported_sets")
   supp
 }
@@ -87,7 +90,7 @@ nearest_points <- function(coords, netcdf, data_set = "ts322", npoints = 4) {
     all_lon <- ncvar_get(netcdf, "lon")
     all_lat <- ncvar_get(netcdf, "lat")
   } else {
-    if (any(data_set == c("eobs140"))) {
+    if (any(data_set == c("eobs140", "puhg_pet"))) {
       all_lon <- ncvar_get(netcdf, "longitude")
       all_lat <- ncvar_get(netcdf, "latitude")
     }
@@ -208,11 +211,12 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
   }
 
   first_date <- switch(data_set,
-                       ts322 = as.Date("1901-01-01"),
-                       ts321 = as.Date("1901-01-01"),
-                       spei22 = as.Date("1901-01-01"),
-                       pdsidai2011 = as.Date("1850-01-01"),
-                       eobs140 = as.Date("1950-01-01"))
+                      ts322 = as.Date("1901-01-01"),
+                      ts321 = as.Date("1901-01-01"),
+                      spei22 = as.Date("1901-01-01"),
+                      pdsidai2011 = as.Date("1850-01-01"),
+                      eobs140 = as.Date("1950-01-01"),
+                      puhg_pet = as.Date("1948-01-01"))
 
   ## all dates in the data
   time_length <- length(ncvar_get(netcdf, "time"))
@@ -254,22 +258,24 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     this_lat <- nearest[[i]]$lat
 
     .start <- switch(data_set,
-                     ts322 = c(this_lon, this_lat, 1),
-                     ts321 = c(this_lon, this_lat, 1),
-                     spei22 = c(this_lon, this_lat, 1),
-                     pdsidai2011 = c(this_lon, this_lat, 1),
-                     eobs140 = c(this_lon, this_lat, 1))
+                    ts322 = c(this_lon, this_lat, 1),
+                    ts321 = c(this_lon, this_lat, 1),
+                    spei22 = c(this_lon, this_lat, 1),
+                    pdsidai2011 = c(this_lon, this_lat, 1),
+                    eobs140 = c(this_lon, this_lat, 1),
+                    puhg_pet = c(this_lon, this_lat, 1, 1))
 
     .count <- switch(data_set,
-                     ts322 = c(1, 1, -1),
-                     ts321 = c(1, 1, -1),
-                     spei22 = c(1, 1, -1),
-                     pdsidai2011 = c(1, 1, -1),
-                     eobs140 = c(1, 1, -1))
-
+                    ts322 = c(1, 1, -1),
+                    ts321 = c(1, 1, -1),
+                    spei22 = c(1, 1, -1),
+                    pdsidai2011 = c(1, 1, -1),
+                    eobs140 = c(1, 1, -1),
+                    puhg_pet = c(1, 1, 1, -1))
+    
     .extract <- ncvar_get(netcdf, param,
-                          start = .start,
-                          count = .count)
+                         start = .start,
+                         count = .count)
 
     if (downscale) {
 
@@ -296,12 +302,22 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
   }
 
   ## any points all NA (sea?)
+  ##:ess-bp-start::browser@nil:##
   seap <- apply(extract, 2, function(x) all(is.na(x)))
 
   ## interpolate values/anomalies using inverse distance weighting
   weights <- 1/dists[!seap]
-  extract_weight <- sweep(extract[,!seap], 2, weights, `*`)
-  extract_int <- apply(extract_weight, 1, function(x) sum(x/sum(weights)))
+  if (sum(!seap) > 1) {
+    extract_weight <- sweep(extract[,!seap], 2, weights, `*`)
+    extract_int <- apply(extract_weight, 1, function(x)
+      sum(x/sum(weights)))
+  } else {
+    if (sum(!seap) == 1) {
+      extract_int <- extract[,!seap]
+    } else {
+      stop("All data is NA for the nearest points.")
+    }
+  }
 
   Years <- as.numeric(substr(dates_all, 1, 4))
   Months <- as.numeric(substr(dates_all, 6, 7))

@@ -9,4 +9,3 @@ gridcellarea(coords, resolution = 0.5)
 \description{
 Approximating grid cell area as trapezoid area
 }
-
