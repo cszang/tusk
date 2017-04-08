@@ -8,7 +8,8 @@ nearest_points(coords, netcdf, data_set = "ts322", npoints = 4)
 }
 \arguments{
 \item{coords}{the coordinates to find the nearest gridpoints for
-as list with $lon and $lat in decimal degrees}
+as list with $lon and $lat in decimal degrees (negative for
+degrees west/south)}
 
 \item{netcdf}{the ncdf object holding the relevant data}
 

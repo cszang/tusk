@@ -69,13 +69,42 @@ great_circle_dist <- function(x1, x2) {
   dist
 }
 
+# TODO Wird das gebraucht? Wenn ja, müssen auch die gesamten lon/lats
+# übergeben werden; siehe auch unten neue Funktion get closest grid
+# cell...
+##' @keywords internal
+get_lat_lon_from_ncdf <- function(netcdf, coords, data_set) {
+  if (!any(supported_sets()$abbrev == data_set)) {
+    stop("Data set not supported. See ?supported_sets.")
+  }
+  if (any(data_set == c("ts322", "ts321", "spei22", "pdsidai2011"))) {
+    all_lon <- ncvar_get(netcdf, "lon")
+    all_lat <- ncvar_get(netcdf, "lat")
+  } else {
+    if (any(data_set == c("eobs140", "puhg_pet"))) {
+      all_lon <- ncvar_get(netcdf, "longitude")
+      all_lat <- ncvar_get(netcdf, "latitude")
+    }
+  }
+  lon <- coords$lon
+  lat <- coords$lat
+  if (any(data_set == c("puhg_pet"))) {
+    if (lon < 0) {
+      lon <- 360 - lon
+    }
+  }
+  list(lon = lon, lat = lat)
+}
+
+
 ##' Get four or sixteen nearest gridpoints for a lon/lat pair.
 ##'
 ##' The returned list of gridpoint coordinates can be used for
 ##' interpolation
 ##' @title Get 4 or 16 nearest gridpoints
 ##' @param coords the coordinates to find the nearest gridpoints for
-##' as list with $lon and $lat in decimal degrees
+##' as list with $lon and $lat in decimal degrees (negative for
+##' degrees west/south)
 ##' @param netcdf the ncdf object holding the relevant data
 ##' @param data_set the kind of data used (see ?supported_sets) for details
 ##' @return a list holding four or sixteen lists, with each holding a
@@ -97,6 +126,11 @@ nearest_points <- function(coords, netcdf, data_set = "ts322", npoints = 4) {
   }
   lon <- coords$lon
   lat <- coords$lat
+  if (any(data_set == c("puhg_pet"))) {
+    if (lon < 0) {
+      lon <- 360 - lon
+    }
+  }
   lons <- c(tail(which(all_lon < lon), 1), which(all_lon > lon)[1])
   lats <- c(tail(which(all_lat < lat), 1), which(all_lat > lat)[1])
   replace_missing <- function(x) {
@@ -143,6 +177,7 @@ print.tusk_nearest_points <- function(x, ...) {
   print(pretty_coords, ...)
 }
 
+
 ##' Interpolate and downscale gridded climate data for a given
 ##' coordinate pair
 ##'
@@ -181,8 +216,8 @@ print.tusk_nearest_points <- function(x, ...) {
 ##' @import ncdf4 raster rgdal
 ##' @export
 interp_down <- function(netcdf, worldclim = NULL, param, coords,
-                             nearest, data_set = "ts322", downscale = FALSE) {
-
+                       nearest, data_set = "ts322", downscale = FALSE) {
+  
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
   }
@@ -195,11 +230,20 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     stop("Downscaling only implemented for CRU data.")
   }
 
+  lon <- coords$lon
+  lat <- coords$lat
+  
+  if (any(data_set == c("puhg_pet"))) {
+    if (lon < 0) {
+      lon <- 360 - lon
+    }
+  }
+
   ## methods for computing anomalies (meth1) and rescaling to
   ## worldclim climatology (meth2): this is subtraction/addition for
   ## temperatures, and division/multiplication for precipitation
   if (downscale) {
-    if(any(c("prec", "pre") == param)) {
+    if (any(c("prec", "pre") == param)) {
       meth1 <- function(x, y) { y / x }
       meth2 <- function(x, y) { y * x }
       scale_fac <- 1 # no division needed, WC is "as is"
@@ -297,12 +341,10 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     extract <- cbind(extract, .extract)
 
     dists[i] <- great_circle_dist(attr(nearest, "coords")[[i]],
-                                  list(lon = coords$lon,
-                                       lat = coords$lat))
+                                 list(lon = lon, lat = lat))
   }
 
   ## any points all NA (sea?)
-  ##:ess-bp-start::browser@nil:##
   seap <- apply(extract, 2, function(x) all(is.na(x)))
 
   ## interpolate values/anomalies using inverse distance weighting
@@ -343,7 +385,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     out
 
   } else {
-
+    
     ## rescale w/ worldclim climatology
 
     wc_files <- list.files(worldclim, pattern = ".*\\.bil$")
@@ -378,6 +420,13 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     out
 
   }
+}
+
+nearest_cell_with_data <- function(netcdf, param, coords,
+                                  data_set = "ts322") {
+  
+  coords <- get_lat_lon_from_ncdf(netcdf, coords, data_set)
+  
 }
 
 ##' Approximating grid cell area as trapezoid area
