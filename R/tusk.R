@@ -1,9 +1,11 @@
 ##' Reported supported data sets
 ##'
+##' ts401: CRU TS 4.01
 ##' ts322: CRU TS 3.22
 ##' ts321: CRU TS 3.21
 ##' spei22: SPEIbase v.2.2
 ##' pdsidai2011: scPDSI from Dai 2011a and 2011b
+##' eobs160: E-OBS data daily data version 16.0
 ##' eobs140: E-OBS data daily data version 14.0
 ##' puhg_pet: Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset
 ##' @title Supported data sets
@@ -12,10 +14,10 @@
 ##' supported_sets()
 ##' @export
 supported_sets <- function() {
-  supp <- list(abbrev = c("ts322", "ts321", "spei22", "pdsidai2011",
-                         "eobs140", "puhg_pet"),
-       full = c("CRU TS 3.22", "CRU TS 3.21", "SPEIbase v.2.2",
-                "scPDSI from Dai 2011a and 2011b", "E-OBS 14.0",
+  supp <- list(abbrev = c("ts401", "ts322", "ts321", "spei22", "pdsidai2011",
+                         "eobs160", "eobs140", "puhg_pet"),
+       full = c("CRU TS 4.01", "CRU TS 3.22", "CRU TS 3.21", "SPEIbase v.2.2",
+                "scPDSI from Dai 2011a and 2011b", "E-OBS 16.0", "E-OBS 14.0",
                 "Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset"))
   class(supp) <- c("list", "tusk_supported_sets")
   supp
@@ -77,11 +79,11 @@ get_lat_lon_from_ncdf <- function(netcdf, coords, data_set) {
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
   }
-  if (any(data_set == c("ts322", "ts321", "spei22", "pdsidai2011"))) {
+  if (any(data_set == c("ts401", "ts322", "ts321", "spei22", "pdsidai2011"))) {
     all_lon <- ncvar_get(netcdf, "lon")
     all_lat <- ncvar_get(netcdf, "lat")
   } else {
-    if (any(data_set == c("eobs140", "puhg_pet"))) {
+    if (any(data_set == c("eobs160", "eobs140", "puhg_pet"))) {
       all_lon <- ncvar_get(netcdf, "longitude")
       all_lat <- ncvar_get(netcdf, "latitude")
     }
@@ -111,15 +113,15 @@ get_lat_lon_from_ncdf <- function(netcdf, coords, data_set) {
 ##' lat/lot
 ##' @import ncdf4
 ##' @export
-nearest_points <- function(coords, netcdf, data_set = "ts322", npoints = 4) {
+nearest_points <- function(coords, netcdf, data_set = "ts401", npoints = 4) {
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
   }
-  if (any(data_set == c("ts322", "ts321", "spei22", "pdsidai2011"))) {
+  if (any(data_set == c("ts401", "ts322", "ts321", "spei22", "pdsidai2011"))) {
     all_lon <- ncvar_get(netcdf, "lon")
     all_lat <- ncvar_get(netcdf, "lat")
   } else {
-    if (any(data_set == c("eobs140", "puhg_pet"))) {
+    if (any(data_set == c("eobs160", "eobs140", "puhg_pet"))) {
       all_lon <- ncvar_get(netcdf, "longitude")
       all_lat <- ncvar_get(netcdf, "latitude")
     }
@@ -216,7 +218,7 @@ print.tusk_nearest_points <- function(x, ...) {
 ##' @import ncdf4 raster rgdal
 ##' @export
 interp_down <- function(netcdf, worldclim = NULL, param, coords,
-                       nearest, data_set = "ts322", downscale = FALSE) {
+                       nearest, data_set = "ts401", downscale = FALSE) {
   
   if (!any(supported_sets()$abbrev == data_set)) {
     stop("Data set not supported. See ?supported_sets.")
@@ -226,7 +228,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     stop("For downscaling worldclim data is needed.")
   }
 
-  if (downscale & (!any(c("ts322", "ts321") == data_set))) {
+  if (downscale & (!any(c("ts401", "ts322", "ts321") == data_set))) {
     stop("Downscaling only implemented for CRU data.")
   }
 
@@ -255,16 +257,18 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
   }
 
   first_date <- switch(data_set,
+                      ts401 = as.Date("1901-01-01"),
                       ts322 = as.Date("1901-01-01"),
                       ts321 = as.Date("1901-01-01"),
                       spei22 = as.Date("1901-01-01"),
                       pdsidai2011 = as.Date("1850-01-01"),
+                      eobs160 = as.Date("1950-01-01"),
                       eobs140 = as.Date("1950-01-01"),
                       puhg_pet = as.Date("1948-01-01"))
 
   ## all dates in the data
   time_length <- length(ncvar_get(netcdf, "time"))
-  if (any(c("eobs140") == data_set)) {
+  if (any(c("eobs160", "eobs140") == data_set)) {
     dates_all <- seq(first_date, length.out = time_length,
                      by = "1 day")
   } else {
@@ -302,18 +306,22 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     this_lat <- nearest[[i]]$lat
 
     .start <- switch(data_set,
+                    ts401 = c(this_lon, this_lat, 1),
                     ts322 = c(this_lon, this_lat, 1),
                     ts321 = c(this_lon, this_lat, 1),
                     spei22 = c(this_lon, this_lat, 1),
                     pdsidai2011 = c(this_lon, this_lat, 1),
+                    eobs160 = c(this_lon, this_lat, 1),
                     eobs140 = c(this_lon, this_lat, 1),
                     puhg_pet = c(this_lon, this_lat, 1, 1))
 
     .count <- switch(data_set,
+                    ts401 = c(1, 1, -1),
                     ts322 = c(1, 1, -1),
                     ts321 = c(1, 1, -1),
                     spei22 = c(1, 1, -1),
                     pdsidai2011 = c(1, 1, -1),
+                    eobs160 = c(1, 1, -1),
                     eobs140 = c(1, 1, -1),
                     puhg_pet = c(1, 1, 1, -1))
     
@@ -364,7 +372,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
   Years <- as.numeric(substr(dates_all, 1, 4))
   Months <- as.numeric(substr(dates_all, 6, 7))
   
-  if (any(c("eobs140") == data_set)) {
+  if (any(c("eobs160", "eobs140") == data_set)) {
     Days <- as.numeric(substr(dates_all, 9, 10))
     out <- data.frame(
       year = Years,
@@ -423,7 +431,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
 }
 
 nearest_cell_with_data <- function(netcdf, param, coords,
-                                  data_set = "ts322") {
+                                  data_set = "ts401") {
   
   coords <- get_lat_lon_from_ncdf(netcdf, coords, data_set)
   

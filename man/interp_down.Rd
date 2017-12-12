@@ -5,7 +5,7 @@
 \title{Interpolate and downscale from gridded climate data sets}
 \usage{
 interp_down(netcdf, worldclim = NULL, param, coords, nearest,
-  data_set = "ts322", downscale = FALSE)
+  data_set = "ts401", downscale = FALSE)
 }
 \arguments{
 \item{netcdf}{the ncdf object the data should be extracted from}

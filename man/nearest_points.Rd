@@ -4,7 +4,7 @@
 \alias{nearest_points}
 \title{Get 4 or 16 nearest gridpoints}
 \usage{
-nearest_points(coords, netcdf, data_set = "ts322", npoints = 4)
+nearest_points(coords, netcdf, data_set = "ts401", npoints = 4)
 }
 \arguments{
 \item{coords}{the coordinates to find the nearest gridpoints for

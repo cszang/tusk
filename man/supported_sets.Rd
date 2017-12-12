@@ -13,10 +13,12 @@ a vector holding the short names of supported data sets
 Reported supported data sets
 }
 \details{
+ts401: CRU TS 4.01
 ts322: CRU TS 3.22
 ts321: CRU TS 3.21
 spei22: SPEIbase v.2.2
 pdsidai2011: scPDSI from Dai 2011a and 2011b
+eobs160: E-OBS data daily data version 16.0
 eobs140: E-OBS data daily data version 14.0
 puhg_pet: Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset
 }
