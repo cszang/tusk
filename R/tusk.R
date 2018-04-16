@@ -5,6 +5,7 @@
 ##' ts321: CRU TS 3.21
 ##' spei22: SPEIbase v.2.2
 ##' pdsidai2011: scPDSI from Dai 2011a and 2011b
+##' eobs170: E-OBS data daily data version 17.0
 ##' eobs160: E-OBS data daily data version 16.0
 ##' eobs140: E-OBS data daily data version 14.0
 ##' puhg_pet: Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset
@@ -15,12 +16,17 @@
 ##' @export
 supported_sets <- function() {
   supp <- list(abbrev = c("ts401", "ts322", "ts321", "spei22", "pdsidai2011",
-                         "eobs160", "eobs140", "puhg_pet"),
+                          "eobs170", "eobs160", "eobs140", "puhg_pet"),
        full = c("CRU TS 4.01", "CRU TS 3.22", "CRU TS 3.21", "SPEIbase v.2.2",
-                "scPDSI from Dai 2011a and 2011b", "E-OBS 16.0", "E-OBS 14.0",
+                "scPDSI from Dai 2011a and 2011b", "E-OBS 17.0", "E-OBS 16.0", "E-OBS 14.0",
                 "Princeton University Hydroclimatology Group 61-yr (1948-2008) Potential Evaporation Dataset"))
   class(supp) <- c("list", "tusk_supported_sets")
   supp
+}
+
+pf <- function(x) {
+  library(dplyr)
+  
 }
 
 ##' @export
@@ -83,7 +89,7 @@ get_lat_lon_from_ncdf <- function(netcdf, coords, data_set) {
     all_lon <- ncvar_get(netcdf, "lon")
     all_lat <- ncvar_get(netcdf, "lat")
   } else {
-    if (any(data_set == c("eobs160", "eobs140", "puhg_pet"))) {
+    if (any(data_set == c("eobs170", "eobs160", "eobs140", "puhg_pet"))) {
       all_lon <- ncvar_get(netcdf, "longitude")
       all_lat <- ncvar_get(netcdf, "latitude")
     }
@@ -111,7 +117,7 @@ get_lat_lon_from_ncdf <- function(netcdf, coords, data_set) {
 ##' @param data_set the kind of data used (see ?supported_sets) for details
 ##' @return a list holding four or sixteen lists, with each holding a
 ##' lat/lot
-##' @import ncdf4
+##' @import pbdNCDF4
 ##' @export
 nearest_points <- function(coords, netcdf, data_set = "ts401", npoints = 4) {
   if (!any(supported_sets()$abbrev == data_set)) {
@@ -121,7 +127,7 @@ nearest_points <- function(coords, netcdf, data_set = "ts401", npoints = 4) {
     all_lon <- ncvar_get(netcdf, "lon")
     all_lat <- ncvar_get(netcdf, "lat")
   } else {
-    if (any(data_set == c("eobs160", "eobs140", "puhg_pet"))) {
+    if (any(data_set == c("eobs170", "eobs160", "eobs140", "puhg_pet"))) {
       all_lon <- ncvar_get(netcdf, "longitude")
       all_lat <- ncvar_get(netcdf, "latitude")
     }
@@ -262,13 +268,14 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
                       ts321 = as.Date("1901-01-01"),
                       spei22 = as.Date("1901-01-01"),
                       pdsidai2011 = as.Date("1850-01-01"),
+                      eobs170 = as.Date("1950-01-01"),
                       eobs160 = as.Date("1950-01-01"),
                       eobs140 = as.Date("1950-01-01"),
                       puhg_pet = as.Date("1948-01-01"))
 
   ## all dates in the data
   time_length <- length(ncvar_get(netcdf, "time"))
-  if (any(c("eobs160", "eobs140") == data_set)) {
+  if (any(c("eobs170", "eobs160", "eobs140") == data_set)) {
     dates_all <- seq(first_date, length.out = time_length,
                      by = "1 day")
   } else {
@@ -311,6 +318,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
                     ts321 = c(this_lon, this_lat, 1),
                     spei22 = c(this_lon, this_lat, 1),
                     pdsidai2011 = c(this_lon, this_lat, 1),
+                    eobs170 = c(this_lon, this_lat, 1),
                     eobs160 = c(this_lon, this_lat, 1),
                     eobs140 = c(this_lon, this_lat, 1),
                     puhg_pet = c(this_lon, this_lat, 1, 1))
@@ -321,6 +329,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
                     ts321 = c(1, 1, -1),
                     spei22 = c(1, 1, -1),
                     pdsidai2011 = c(1, 1, -1),
+                    eobs170 = c(1, 1, -1),
                     eobs160 = c(1, 1, -1),
                     eobs140 = c(1, 1, -1),
                     puhg_pet = c(1, 1, 1, -1))
@@ -372,7 +381,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
   Years <- as.numeric(substr(dates_all, 1, 4))
   Months <- as.numeric(substr(dates_all, 6, 7))
   
-  if (any(c("eobs160", "eobs140") == data_set)) {
+  if (any(c("eobs170", "eobs160", "eobs140") == data_set)) {
     Days <- as.numeric(substr(dates_all, 9, 10))
     out <- data.frame(
       year = Years,
