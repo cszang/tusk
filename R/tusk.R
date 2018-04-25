@@ -242,6 +242,36 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     }
   }
 
+  ## check if worldclim data is available, set downscale (back) to
+  ## FALSE if not
+  if (downscale) {
+    wc_files <- list.files(worldclim, pattern = ".*\\.bil$")
+    wc_param <- strsplit(wc_files[1], "_")[[1]][1]
+    spp <- SpatialPoints(
+      data.frame(
+        x = coords$lon,
+        y = coords$lat))
+    wc <- raster(file.path(worldclim, paste(wc_param, "_", 1, ".bil",
+                                            sep = "")))
+    wc_point <- raster::extract(wc, spp)
+    ## when this is NA, we have to look for the next nearest point
+    ## that is not NA
+    if (is.na(wc_point)) {
+      arc30 <-  30/3600
+      spp2 <- expand.grid(
+        data.frame(
+          x = c(coords$lon - arc30, coords$lon + arc30),
+          y = c(coords$lat - arc30, coords$lat + arc30)
+        ))
+      spp2 <- SpatialPoints(spp2)
+      wc_points <- raster::extract(wc, spp2)
+      if (all(is.na(wc_points))) {
+        downscale <- FALSE
+        cat("No matching worldclim data -> setting `downscale` back to `FALSE`.\n")
+      }
+    }
+  }
+
   ## methods for computing anomalies (meth1) and rescaling to
   ## worldclim climatology (meth2): this is subtraction/addition for
   ## temperatures, and division/multiplication for precipitation
@@ -400,18 +430,11 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
     
     ## rescale w/ worldclim climatology
 
-    wc_files <- list.files(worldclim, pattern = ".*\\.bil$")
-    wc_param <- strsplit(wc_files[1], "_")[[1]][1]
-    spp <- SpatialPoints(
-      data.frame(
-        x = coords$lon,
-        y = coords$lat))
-
     for (j in month_num) {
       wc <- raster(file.path(worldclim, paste(wc_param, "_", j, ".bil",
                                               sep = "")))
       ## FIXME hier muss der Datentyp richtig geraten werden!
-      wc_point <- extract(wc, spp)/scale_fac
+      wc_point <- raster::extract(wc, spp)/scale_fac
       ## when this is NA, we have to look for the next nearest point
       ## that is not NA
       if (is.na(wc_point)) {
@@ -422,7 +445,7 @@ interp_down <- function(netcdf, worldclim = NULL, param, coords,
             y = c(coords$lat - arc30, coords$lat + arc30)
             ))
         spp2 <- SpatialPoints(spp2)
-        wc_points <- extract(wc, spp2)/scale_fac
+        wc_points <- raster::extract(wc, spp2)/scale_fac
         wc_point <- wc_points[which(!is.na(wc_points))][1]
       }
       out[out$month == j,]$extract <-
