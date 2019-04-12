@@ -1,4 +1,6 @@
-[[https://travis-ci.org/cszang/tusk][file:https://travis-ci.org/cszang/tusk.svg?branch=master]]
+* THIS PACKAGE IS DEPRECATED!
+
+  Use [[https://github.com/cszang/clex][clex]] instead!
 
 * tusk
   Make working with gridded climate data in R a little easier. 
